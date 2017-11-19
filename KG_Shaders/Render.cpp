@@ -448,7 +448,13 @@ void Render(OpenGL *ogl)
 		glUniform3fARB(location, light.pos.X(), light.pos.Y(), light.pos.Z());
 	}
 
-	location = glGetUniformLocationARB(_shader.program, "iResolution");
+	location = glGetUniformLocationARB(_shader.program, "iCamPos");
+	if (location > -1)
+	{
+		glUniform3fARB(location, camera.pos.X(), camera.pos.Y(), camera.pos.Z());
+	}
+
+	location = glGetUniformLocationARB(_shader.program, "iCamPos");
 	if (location > -1)
 	{
 		glUniform2fARB(location,ogl_obj->getHeight(), ogl_obj->getWidth());

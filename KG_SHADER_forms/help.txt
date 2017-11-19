@@ -13,3 +13,4 @@ KG Shaders
   uniform sampler2D iTexture0;  //текстурный идентификатор, 0-3
   uniform vec2 iResolution; //размеры области рендера
   uniform vec3 iLight; //координаты желтой точки 
+  uniform vec3 iCamPos  //координаты камеры
