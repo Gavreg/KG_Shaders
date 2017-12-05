@@ -55,10 +55,10 @@ int ReadUInt(string &s, int *pos, unsigned int *value)
 int loadModel(LPWSTR filename, ObjFile *file)
 {
 
-	
+
 	char *buf;
 	long buf_size;
-	
+
 
 	//открываем файл
 	HANDLE _file = CreateFile(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -68,17 +68,17 @@ int loadModel(LPWSTR filename, ObjFile *file)
 	GetFileSizeEx(_file, &size);
 
 	buf_size = size.LowPart;
-	 	
+
 	buf = new char[buf_size];
-	
+
 	DWORD nBytesRead = 0;
-	
+
 	ReadFile(_file, buf, buf_size, &nBytesRead, 0);
 	CloseHandle(_file);
-	
-	
+
+
 	//vector<string> objStrings;
-		
+
 	char *cur;
 	char *new_cur;
 
@@ -92,19 +92,19 @@ int loadModel(LPWSTR filename, ObjFile *file)
 	bool isHaveTexCoords = false;
 	bool isHaveNormals = false;
 	string str;
-	
+
 	DWORD tick2 = GetTickCount();
 
 	file->Faces.clear();
-	
+
 	while (1)
 	{
-		
-		new_cur = strstr(cur,"\n");
+
+		new_cur = strstr(cur, "\n");
 		if (!new_cur)
-			new_cur = buf+buf_size;
-		int strsize = new_cur - cur;		
-		
+			new_cur = buf + buf_size;
+		int strsize = new_cur - cur;
+
 		if (strsize > 0)
 		{
 			str.clear();
@@ -139,12 +139,12 @@ int loadModel(LPWSTR filename, ObjFile *file)
 					V.push_back(vert);
 
 					break;
-				}
+				} //if v
 
 				if (str.find("vt ") == 0) //описание текст. координат
 				{
 					DWORD tick1 = GetTickCount();
-					
+
 					int pos = 2;
 					ObjTexCord tex;
 					double v;
@@ -165,12 +165,12 @@ int loadModel(LPWSTR filename, ObjFile *file)
 
 
 					break;
-				}
+				}  //if vt
 
 				if (str.find("vn ") == 0) //описание нормалей
 				{
 					DWORD tick1 = GetTickCount();
-					
+
 					int pos = 2;
 					double v;
 					ObjNormal norm;
@@ -191,7 +191,7 @@ int loadModel(LPWSTR filename, ObjFile *file)
 
 
 					break;
-				}
+				} //if vn
 
 				if (str.find("f ") == 0) //описание граней
 				{
@@ -207,20 +207,21 @@ int loadModel(LPWSTR filename, ObjFile *file)
 					vector<unsigned int> Normals;
 
 					unsigned int v = 0, t = 0, n = 0;
-					
+
 					file->Faces.push_back(ObjFace());
 					std::list<ObjFace>::reverse_iterator it = file->Faces.rbegin();
-						
+
 					while (ReadUInt(str, &pos, &d1))
 					{
 						v = d1;/////   точка
 						t = 0;
 						n = 0;
-						it->vertex.push_back(V[v-1]);
-						
+						it->vertex.push_back(V[v - 1]);
+
 
 						if (str[pos] == ' ')
 							continue;
+
 						if (str[pos] == '/' && str[pos + 1] == '/')
 							if (ReadUInt(str, &pos, &d1))  ///////////   нормаль без текстуры
 								n = d1;
@@ -255,31 +256,32 @@ int loadModel(LPWSTR filename, ObjFile *file)
 						if (isHaveNormals && (Vertexes.size() != Normals.size()) ||
 							isHaveTexCoords&&Vertexes.size() != TexCoords.size())
 							return -12;  //неодинаковое описание вершины!! ошибка
-					}					
+					} //while (ReadUInt(str, &pos, &d1))
+
 					break;
-				}
+				} //if f
+
 				break;
 			}
-		}
+
+		} //if str size
 		cur = new_cur + 1;
 
-		if (cur > (buf+buf_size))
-			break;		
-	}	
+		if (cur > (buf + buf_size))
+			break;
+	}
 	delete buf;
-	
 
+	glDeleteLists(file->listId, 1);
+	file->listId = glGenLists(1);
+	glNewList(file->listId,GL_COMPILE);
+	file->RenderModel(GL_POLYGON);
+	glEndList();
 
 	return 1;
 
-
-
 }
 
 
 
-ObjFile::~ObjFile()
-{
 
-
-}

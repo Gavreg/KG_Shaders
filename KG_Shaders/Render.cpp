@@ -34,7 +34,7 @@ OpenGL *ogl_obj;
 enum Mode
 {
 	PLANE, ORTHO, MODEL, BATERFLY
-} mode = Mode::PLANE;
+} mode;
 
 
 
@@ -358,6 +358,8 @@ void initRender(OpenGL *ogl)
 	tick_o = GetTickCount();
 	tick_n = GetTickCount();
 
+	mode = Mode::PLANE;
+
 }
 
 bool canRender = false;
@@ -442,7 +444,7 @@ void Render(OpenGL *ogl)
 	{
 		glUniform1fARB(location, Time);
 	}
-	location = glGetUniformLocationARB(_shader.program, "iLight");
+	location = glGetUniformLocationARB(_shader.program, "iLightPos");
 	if (location > -1)
 	{
 		glUniform3fARB(location, light.pos.X(), light.pos.Y(), light.pos.Z());
@@ -454,10 +456,10 @@ void Render(OpenGL *ogl)
 		glUniform3fARB(location, camera.pos.X(), camera.pos.Y(), camera.pos.Z());
 	}
 
-	location = glGetUniformLocationARB(_shader.program, "iCamPos");
+	location = glGetUniformLocationARB(_shader.program, "iResolution");
 	if (location > -1)
 	{
-		glUniform2fARB(location,ogl_obj->getHeight(), ogl_obj->getWidth());
+		glUniform2iARB(location,ogl_obj->getHeight(), ogl_obj->getWidth());
 	}
 
 	if (mode == Mode::PLANE)

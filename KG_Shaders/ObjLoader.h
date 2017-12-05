@@ -113,6 +113,6 @@ struct ObjFile
 	
 };
 
-int loadModel(char *filename, ObjFile *file);
+int loadModel(LPWSTR filename, ObjFile *file);
 
 #endif
