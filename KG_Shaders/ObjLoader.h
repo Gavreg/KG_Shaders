@@ -55,49 +55,64 @@ struct ObjFace
 
 struct ObjFile
 {
-	std::list<ObjFace> Faces;
-
-	inline void DrawObj(GLenum mode = 0x0009) //GL_POLYGON
+	ObjFile()
 	{
+		
 
+	}
+	~ObjFile()
+	{
+		glDeleteLists(listId, 1);
+	}
+
+	std::list<ObjFace> Faces;
+	
+	int listId=-1;
+
+	inline void RenderModel(int mode)
+	{
 		for (std::list<ObjFace>::iterator it = Faces.begin(); it != Faces.end(); ++it)
 		{
 			glBegin(mode);
 
-			
+
 			bool f_n = (it->normal.size() != 0);
 			bool f_t = (it->texCoord.size() != 0);
 			auto it_n = it->normal.begin();
 			auto it_t = it->texCoord.begin();
-			
+
 			for (auto j = it->vertex.begin(); j != it->vertex.end(); ++j)
 			{
-				
+
 				if (f_n)
 				{
 					glNormal3dv((it_n++)->_ptr());
-					
+
 				}
 
 				if (f_t)
 				{
-					glTexCoord2dv((it_t++)->_ptr());					
+					glTexCoord2dv((it_t++)->_ptr());
 				}
-				
+
 				glVertex4dv(j->_ptr());
 			}
 
 			glEnd();
 		}
 	}
+	inline void DrawObj(GLenum mode = 0x0009) //GL_POLYGON
+	{
+		glCallList(listId);
+	}
 
-	~ObjFile();
+	
 	
 
 	//ObjFile(const ObjFile)
 	
 };
 
-int loadModel(LPWSTR filename, ObjFile *file);
+int loadModel(char *filename, ObjFile *file);
 
 #endif

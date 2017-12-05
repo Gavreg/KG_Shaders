@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KG_SHADER_forms"
         mc:Ignorable="d"
-        Title="KG SHADERS" Height="611.533" Width="979">
+        Title="KG SHADERS" Height="611.533" Width="979" WindowStartupLocation="CenterScreen" >
     <Window.Resources>
         <Style x:Key="textureLabelStyle">
             <Setter Property="Control.Margin" Value="125,10,185,87"></Setter> <!-- Height="23"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="81"  -->
@@ -139,7 +139,6 @@ varying vec3 Position;&#13;
 &#13;
 void main(void)&#13;
 {&#13;
-   texCoord    = gl_MultiTexCoord0.xy;&#13;
    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix*gl_Vertex;&#13;
    Position = gl_Vertex.xyz;&#13;
    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;&#13;

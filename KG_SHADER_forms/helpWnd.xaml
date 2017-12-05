@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KG_SHADER_forms"
         mc:Ignorable="d"
-        Title="Хельп!" Height="300" Width="416.779" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
+        Title="Хельп!" Height="438.044" Width="551.562" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
     <Grid>
         <TextBox x:Name="help" Margin="10" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True"></TextBox>
     </Grid>
