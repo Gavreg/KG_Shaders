@@ -25,11 +25,15 @@ namespace KG_SHADER_forms
             InitializeComponent();
 
             Uri uri = new Uri(@"pack://application:,,,/help.txt", UriKind.Absolute);
+
+
             Stream stream = Application.GetResourceStream(uri).Stream;
             using (StreamReader sr = new StreamReader(stream, Encoding.GetEncoding(1251)))
             {
                 help.Text = sr.ReadToEnd();
             }
+
+           
         }
     }
 }

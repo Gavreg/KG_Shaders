@@ -8,7 +8,8 @@
         Title="KG SHADERS" Height="611.533" Width="979" WindowStartupLocation="CenterScreen" >
     <Window.Resources>
         <Style x:Key="textureLabelStyle">
-            <Setter Property="Control.Margin" Value="125,10,185,87"></Setter> <!-- Height="23"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="81"  -->
+            <Setter Property="Control.Margin" Value="125,10,185,87"></Setter>
+            <!-- Height="23"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="81"  -->
             <Setter Property="Control.HorizontalAlignment" Value="Left"></Setter>
             <Setter Property="Control.VerticalAlignment" Value="Top"></Setter>
             <Setter Property="Control.Width" Value="81"></Setter>
@@ -132,6 +133,7 @@
                             SyntaxHighlighting="C++"
                             FontSize="10pt"
                             ShowLineNumbers="True"
+                            
                             Text="
 varying vec2 texCoord;&#13;
 varying vec3 Normal;&#13;
@@ -144,7 +146,7 @@ void main(void)&#13;
    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;&#13;
    texCoord = gl_TexCoord[0].xy;&#13;
    Normal = normalize(gl_Normal);&#13;
-}">
+}" Grid.ColumnSpan="2">
                         </avalonEdit:TextEditor>
 
                     </Grid>

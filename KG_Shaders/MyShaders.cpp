@@ -20,6 +20,7 @@ PFNGLUNIFORM2IARBPROC glUniform2iARB;
 PFNGLUNIFORM3FARBPROC glUniform3fARB;
 PFNGLUNIFORM2FARBPROC glUniform2fARB;
 PFNGLUNIFORM4FARBPROC glUniform4fARB;
+PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
 PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
 PFNGLACTIVETEXTUREPROC glActiveTexture;
 
@@ -85,6 +86,7 @@ void initShadersFunctions()
 	glUniform4fARB = (PFNGLUNIFORM4FARBPROC)wglGetProcAddress("glUniform4fARB");
 	glUniform2fARB = (PFNGLUNIFORM2FARBPROC)wglGetProcAddress("glUniform2fARB");
 	glUniform1iARB = (PFNGLUNIFORM1IARBPROC)wglGetProcAddress("glUniform1iARB");
+	glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)wglGetProcAddress("glUniformMatrix4fv");
 	glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)wglGetProcAddress("glGetUniformLocationARB");
 	
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -17,6 +17,7 @@ using System.Net;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using Image = System.Windows.Controls.Image;
 
 
 //Маршаллинг функций из DLL, написанной на плюсах
@@ -113,6 +114,7 @@ namespace KG_SHADER_forms
             {
                 textures[i] = string.Empty;
             }
+            
         }
 
 
@@ -215,8 +217,6 @@ namespace KG_SHADER_forms
 
         private void LoadTexture(int chanel, string fileName)
         {
-
-
             System.Drawing.Bitmap b=null;
             System.Windows.Media.Imaging.BitmapSource bs=null;
             try
@@ -259,52 +259,38 @@ namespace KG_SHADER_forms
             Marshal.FreeHGlobal(unmanagedPointer);
         }
 
-        private void btnTexLoad1(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
 
-            if (openDlg.ShowDialog() == true)
-            {
-                string s = openDlg.FileName;
-                textures[1] = s;
-                LoadTexture(1, s);                
-            }
-        }
 
 
         private void btnTexLoad0(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
+            loadTexture(0);
+        }
 
-            if (openDlg.ShowDialog() == true)
-            {
-                string s = openDlg.FileName;
-                textures[0] = s;
-                LoadTexture(0, s);
-            }
+        private void btnTexLoad1(object sender, RoutedEventArgs e)
+        {
+            loadTexture(1);
         }
 
         private void btnTexLoad2(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
-
-            if (openDlg.ShowDialog() == true)
-            {
-                string s = openDlg.FileName;
-                textures[2] = s;
-                LoadTexture(2, s);
-            }
+            loadTexture(2);
         }
 
         private void btnTexLoad3(object sender, RoutedEventArgs e)
+        {
+            loadTexture(3);
+        }
+
+        private void loadTexture(int number)
         {
             Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
 
             if (openDlg.ShowDialog() == true)
             {
                 string s = openDlg.FileName;
-                textures[3] = s;
-                LoadTexture(3, s);
+                textures[number] = s;
+                LoadTexture(number, s);
             }
         }
 

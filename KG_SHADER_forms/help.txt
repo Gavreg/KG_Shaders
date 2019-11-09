@@ -13,4 +13,7 @@ KG Shaders
   uniform sampler2D iTexture0;  //текстурный идентификатор, 0-3
   uniform vec2 iResolution; //размеры области рендера
   uniform vec3 iLightPos; //координаты желтой точки 
-  uniform vec3 iCamPos  //координаты камеры
+  uniform vec3 iCamPos;  //координаты камеры
+  
+  
+  uniform mat4 iModelViewMatrix; //Чистая модел-вью матрица (без учета glRotate ов, которые вертят крылья бабочки)

@@ -292,6 +292,7 @@ extern "C" __declspec(dllexport) int ex_loadPixShader(void *text, int size)
 
 extern "C" __declspec(dllexport) int ex_loadVertShader(void *text, int size)
 {
+	char* _t = (char*)text;
 	(&_shader)->loadVertShader((char *)text, size, 0);
 	return 1;
 }
@@ -462,6 +463,18 @@ void Render(OpenGL *ogl)
 		glUniform2iARB(location,ogl_obj->getHeight(), ogl_obj->getWidth());
 	}
 
+
+
+	location = glGetUniformLocationARB(_shader.program, "iModelViewMatrix");
+	if (location > -1)
+	{
+		float mv_matrix[16];
+		glGetFloatv(GL_MODELVIEW_MATRIX, mv_matrix);
+		glUniformMatrix4fv(location,1, false, mv_matrix);
+	}
+
+	glNormal3d(0, 0, 1);
+
 	if (mode == Mode::PLANE)
 	{
 		glBegin(GL_QUADS);
@@ -517,7 +530,10 @@ void Render(OpenGL *ogl)
 
 	if (mode == Mode::BATERFLY)
 	{
+
+		
 		PUSH;
+		
 		glRotated((sin(Time*0.005) + 1)*30, 1, 0, 0);
 		glScaled(5, 5, 5);
 		glBegin(GL_QUADS);
