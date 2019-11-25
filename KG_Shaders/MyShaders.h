@@ -72,8 +72,8 @@ public:
 
 	void LoadShaderFromFile();
 
-	int loadPixShader(const char * text, int size, char **err);
-	int loadVertShader(const char * text, int size, char **err);
+	int loadPixShader(const char** text, int* lengths, int count, char** err);
+	int loadVertShader(const char** text, int* lengths, int count, char** err);
 
 
 	void Compile();

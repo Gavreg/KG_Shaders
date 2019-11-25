@@ -21,6 +21,7 @@
 #include "GUItextRectangle.h"
 
 #include "Texture.h"
+#include <chrono>
 
 GuiTextRectangle rec;
 
@@ -163,6 +164,8 @@ float offsetX = 0, offsetY = 0;
 float zoom=1;
 int Time = 0;
 
+std::chrono::steady_clock::time_point chrono_time_base = std::chrono::steady_clock::now();
+
 
 //обработчик движения мыши
 void mouseEvent(OpenGL *ogl, int mX, int mY)
@@ -284,16 +287,21 @@ extern "C" __declspec(dllexport) int ex_loadModel(LPWSTR filename)
 	return 1;
 }
 
-extern "C" __declspec(dllexport) int ex_loadPixShader(void *text, int size)
+//extern "C" __declspec(dllexport) int ex_loadPixShader(void *text, int size)
+//{
+//	(&_shader)->loadPixShader((char *)text, size, 0);
+//	return 1;
+//}
+
+extern "C" __declspec(dllexport) int ex_loadPixShader(const char** strings, int* lengths, int count)
 {
-	(&_shader)->loadPixShader((char *)text, size, 0);
+	(&_shader)->loadPixShader(strings, lengths, count,0);
 	return 1;
 }
 
-extern "C" __declspec(dllexport) int ex_loadVertShader(void *text, int size)
+extern "C" __declspec(dllexport) int ex_loadVertShader(const char** strings, int* lengths, int count)
 {
-	char* _t = (char*)text;
-	(&_shader)->loadVertShader((char *)text, size, 0);
+	(&_shader)->loadVertShader(strings, lengths, count, 0);
 	return 1;
 }
 extern "C" __declspec(dllexport) void ex_Compile()
@@ -303,6 +311,8 @@ extern "C" __declspec(dllexport) void ex_Compile()
 	tick_o = GetTickCount();
 	tick_n = GetTickCount();
 	Time = 0;
+
+	chrono_time_base = std::chrono::steady_clock::now();
 }
 
 extern "C" __declspec(dllexport) void loadTextute(int chanel, unsigned char *texture, int w, int h)
@@ -359,6 +369,8 @@ void initRender(OpenGL *ogl)
 	tick_o = GetTickCount();
 	tick_n = GetTickCount();
 
+	chrono_time_base = std::chrono::steady_clock::now();
+
 	mode = Mode::PLANE;
 
 }
@@ -371,39 +383,21 @@ bool isRendering = false;
 void Render(OpenGL *ogl)
 {   
 	
+	auto chrono_time_interval = std::chrono::steady_clock::now() - chrono_time_base;
+	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(chrono_time_interval);
+	int ms_int = ms.count();
+	
 	//типо часы
 	tick_o = tick_n;
 	tick_n = GetTickCount();
 	Time += (tick_n - tick_o);
-	rec.setText(std::to_wstring(Time/100).data());
+
+	rec.setText(std::to_wstring(ms_int).data());
 
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);	
 	glEnable(GL_DEPTH_TEST);
-
-
-	//альфаналожение
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//настройка материала
-	GLfloat amb[] = { 0.2, 0.2, 0.1, 1. };
-	GLfloat dif[] = { 0.4, 0.65, 0.5, 1. };
-	GLfloat spec[] = { 0.9, 0.8, 0.3, 1. };
-	GLfloat sh = 0.1f * 256;
-
-	//фоновая
-	glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
-	//дифузная
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
-	//зеркальная
-	glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
-	//размер блика
-	glMaterialf(GL_FRONT, GL_SHININESS, sh);
-
-	//===================================
-	//Прогать тут  
 
 
 	//
@@ -443,7 +437,7 @@ void Render(OpenGL *ogl)
 	location = glGetUniformLocationARB(_shader.program, "iTime");
 	if (location > -1)
 	{
-		glUniform1fARB(location, Time);
+		glUniform1iARB(location, ms_int);
 	}
 	location = glGetUniformLocationARB(_shader.program, "iLightPos");
 	if (location > -1)
@@ -460,7 +454,7 @@ void Render(OpenGL *ogl)
 	location = glGetUniformLocationARB(_shader.program, "iResolution");
 	if (location > -1)
 	{
-		glUniform2iARB(location,ogl_obj->getHeight(), ogl_obj->getWidth());
+		glUniform2fARB(location,ogl_obj->getWidth(), ogl_obj->getHeight());
 	}
 
 
@@ -478,12 +472,16 @@ void Render(OpenGL *ogl)
 	if (mode == Mode::PLANE)
 	{
 		glBegin(GL_QUADS);
+		
 		glTexCoord2d(1, 1);
 		glVertex3d(3, 3, 0);
+		
 		glTexCoord2d(1, 0);
 		glVertex3d(3, -3, 0);
+		
 		glTexCoord2d(0, 0);
 		glVertex3d(-3, -3, 0);
+		
 		glTexCoord2d(0, 1);
 		glVertex3d(-3, 3, 0);
 		glEnd();
@@ -499,7 +497,7 @@ void Render(OpenGL *ogl)
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		glOrtho(0, 1, 1, 0, 0, 1);
+		glOrtho(0, 1, 0, 1, 0, 1);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
@@ -575,7 +573,7 @@ void Render(OpenGL *ogl)
 		POP;
 	}
 	
-
+	glActiveTexture(GL_TEXTURE0);
 	RenderGUI(ogl_obj);
 }   //конец тела функции
 

@@ -136,6 +136,7 @@ void GuiTextRectangle::setText(const wchar_t *text, char r, char g , char b )
 	
 	//биндим айдишник, все что будет происходить с текстурой, будте происходить по этому ИД
 
+	
 	glBindTexture(GL_TEXTURE_2D, _d->tex_id);
 
 	//загружаем текстуру в видеопямять, в оперативке нам больше  она не нужна

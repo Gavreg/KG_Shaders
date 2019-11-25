@@ -134,19 +134,20 @@ void Shader::LoadShaderFromFile()
 	free(shader2Text);
 }
 
-int Shader::loadPixShader(const char * text, int size, char ** err)
+int Shader::loadPixShader(const char ** text, int*lengths,int count, char ** err)
 {
 	if (!init)
 		initShadersFunctions();
 
 	glDeleteObjectARB(fragment);
 	fragment = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-	glShaderSourceARB(fragment, 1, &text, &size);
+	
+	glShaderSourceARB(fragment, count, text, lengths);
 
 	return 1;
 }
 
-int Shader::loadVertShader(const char * text, int size, char ** err)
+int Shader::loadVertShader(const char** text, int* lengths, int count, char** err)
 {
 	if (!init)
 		initShadersFunctions();
@@ -154,7 +155,7 @@ int Shader::loadVertShader(const char * text, int size, char ** err)
 	
 	vertex = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
 
-	glShaderSourceARB(vertex, 1, &text, &size);
+	glShaderSourceARB(vertex, count, text, lengths);
 
 	return 1;
 }

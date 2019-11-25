@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,10 +20,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Image = System.Windows.Controls.Image;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 
 //Маршаллинг функций из DLL, написанной на плюсах
-class myDll
+internal static class myDll
 {
     [DllImport("KG_Shaders.dll", SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
     public static extern void StartTimer(int i);
@@ -35,11 +38,13 @@ class myDll
     [DllImport("KG_Shaders.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
     public static extern int ex_loadModel(string filename);
 
-    [DllImport("KG_Shaders.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int ex_loadPixShader(IntPtr arr, int size);
+    [DllImport("KG_Shaders.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern int ex_loadPixShader(IntPtr arr,  int size);
+    public static extern int ex_loadPixShader([In, Out] string[] strings,int[] lengths, int size);
 
-    [DllImport("KG_Shaders.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int ex_loadVertShader(IntPtr arr, int size);
+    [DllImport("KG_Shaders.dll",  CallingConvention = CallingConvention.Cdecl)]
+    //public static extern int ex_loadVertShader(IntPtr arr, int size);
+    public static extern int ex_loadVertShader([In, Out] string[] strings, int[] lengths, int size);
 
     [DllImport("KG_Shaders.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
     public static extern void ex_Compile();
@@ -174,23 +179,32 @@ namespace KG_SHADER_forms
         {
             {
                 string a = tbVert.Text;
-                Encoding enc = Encoding.GetEncoding(1251);
-                byte[] b = enc.GetBytes(a);
-                int s = b.Count<byte>();
-                IntPtr unmanagedPointer = Marshal.AllocHGlobal(s);
-                Marshal.Copy(b, 0, unmanagedPointer, s);
-                myDll.ex_loadVertShader(unmanagedPointer, s);
-                Marshal.FreeHGlobal(unmanagedPointer);
+                string[] array = a.Split(new string[] { "\r" }, StringSplitOptions.None);
+
+                List<int> strings_lengts = new List<int>();
+
+                for (int i = 0; i < array.Length; ++i)
+                {
+                    array[i] += "\n";
+                    strings_lengts.Add(array[i].Length);
+                }
+  
+                myDll.ex_loadVertShader(array, strings_lengts.ToArray(), array.Length);
             }
             {
                 string  a = tbPix.Text;
-                Encoding enc = Encoding.GetEncoding(1251);
-                byte[] b = enc.GetBytes(a);
-                int s = b.Count<byte>();
-                IntPtr unmanagedPointer = Marshal.AllocHGlobal(s);
-                Marshal.Copy(b, 0, unmanagedPointer, s);
-                myDll.ex_loadPixShader(unmanagedPointer, s);
-                Marshal.FreeHGlobal(unmanagedPointer);
+
+                string[] array = a.Split(new string[] { "\r" }, StringSplitOptions.None);
+                
+                List<int> strings_lengts = new List<int>();
+
+                for (int i = 0; i < array.Length; ++i)
+                {
+                    array[i] += "\n";
+                    strings_lengts.Add(array[i].Length);
+                }
+
+                myDll.ex_loadPixShader(array, strings_lengts.ToArray(), array.Length);
             }
             
             myDll.ex_Compile();
@@ -222,10 +236,10 @@ namespace KG_SHADER_forms
             try
             {
                 if (new FileInfo(fileName).Exists == false)
-                    return;
+                    return; 
+                
                 b = new System.Drawing.Bitmap(fileName);
-               bs =
-                        System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
                             b.GetHbitmap(),
                             IntPtr.Zero,
                             Int32Rect.Empty,
@@ -235,16 +249,40 @@ namespace KG_SHADER_forms
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                return;
             }
 
             imgArr[chanel].Source = (ImageSource)bs;
 
-            byte[] bb = new byte[b.Height * b.Width * 4];
+            
+
+            var b1 = new System.Drawing.Bitmap(b.Width, b.Height,PixelFormat.Format32bppRgb);
+            using (var g = Graphics.FromImage(b1))
+            {
+                g.SmoothingMode = SmoothingMode.None;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.CompositingQuality = CompositingQuality.AssumeLinear;
+                g.DrawImage(b,0,0,b1.Width,b1.Height);
+            }
+
+
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, b1.Width, b1.Height);
+            var bitmapData = b1.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, b1.PixelFormat);
+            myDll.loadTextute(chanel, bitmapData.Scan0, b1.Width, b1.Height);
+           
+            b1.UnlockBits(bitmapData);
+
+            // Old texture loading
+            /*
+
+            byte[] bb = new byte[b1.Height * b1.Width * 4];
+
+            
             for (int i = 0; i < b.Height; ++i)
             {
                 for (int j = 0; j < b.Width; ++j)
                 {
-                    var c = b.GetPixel(j, i);
+                    var c = b1.GetPixel(j, i);
                     int offset = i * b.Width * 4 + j * 4;
                     bb[offset] = c.R;
                     bb[offset + 1] = c.G;
@@ -253,14 +291,14 @@ namespace KG_SHADER_forms
 
                 }
             }
-            IntPtr unmanagedPointer = Marshal.AllocHGlobal(b.Height * b.Width * 4);
-            Marshal.Copy(bb, 0, unmanagedPointer, b.Height * b.Width * 4);
-            myDll.loadTextute(chanel, unmanagedPointer, b.Width, b.Height);
-            Marshal.FreeHGlobal(unmanagedPointer);
+            IntPtr unmanagedPointer = Marshal.AllocHGlobal(b1.Height * b1.Width * 4);
+            Marshal.Copy(bb, 0, unmanagedPointer, b1.Height * b1.Width * 4);
+            myDll.loadTextute(chanel, unmanagedPointer, b1.Width, b1.Height);
+            Marshal.FreeHGlobal(unmanagedPointer);   
+             
+             */
+
         }
-
-
-
 
         private void btnTexLoad0(object sender, RoutedEventArgs e)
         {
