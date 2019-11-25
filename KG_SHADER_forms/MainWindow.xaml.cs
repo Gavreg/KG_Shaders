@@ -239,8 +239,7 @@ namespace KG_SHADER_forms
                     return; 
                 
                 b = new System.Drawing.Bitmap(fileName);
-               bs =
-                        System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
                             b.GetHbitmap(),
                             IntPtr.Zero,
                             Int32Rect.Empty,
@@ -295,15 +294,11 @@ namespace KG_SHADER_forms
             IntPtr unmanagedPointer = Marshal.AllocHGlobal(b1.Height * b1.Width * 4);
             Marshal.Copy(bb, 0, unmanagedPointer, b1.Height * b1.Width * 4);
             myDll.loadTextute(chanel, unmanagedPointer, b1.Width, b1.Height);
-            Marshal.FreeHGlobal(unmanagedPointer);
-           
+            Marshal.FreeHGlobal(unmanagedPointer);   
              
              */
 
         }
-
-
-
 
         private void btnTexLoad0(object sender, RoutedEventArgs e)
         {

@@ -454,7 +454,7 @@ void Render(OpenGL *ogl)
 	location = glGetUniformLocationARB(_shader.program, "iResolution");
 	if (location > -1)
 	{
-		glUniform2iARB(location,ogl_obj->getHeight(), ogl_obj->getWidth());
+		glUniform2fARB(location,ogl_obj->getWidth(), ogl_obj->getHeight());
 	}
 
 
