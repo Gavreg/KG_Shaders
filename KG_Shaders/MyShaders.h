@@ -39,12 +39,7 @@ extern PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB;
 
 extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 
-
 int loadShader(LPWSTR filename, char **shaderSrc, int *programLength);
-
-
-
-
 
 //вызываем эту функцию в  перед рендером для настройки шейдеров
 void initShadersFunctions();
