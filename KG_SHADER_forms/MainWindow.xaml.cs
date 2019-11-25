@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +20,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Image = System.Windows.Controls.Image;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 
 //Маршаллинг функций из DLL, написанной на плюсах
@@ -222,7 +225,8 @@ namespace KG_SHADER_forms
             try
             {
                 if (new FileInfo(fileName).Exists == false)
-                    return;
+                    return; 
+                
                 b = new System.Drawing.Bitmap(fileName);
                bs =
                         System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
@@ -235,16 +239,40 @@ namespace KG_SHADER_forms
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                return;
             }
 
             imgArr[chanel].Source = (ImageSource)bs;
 
-            byte[] bb = new byte[b.Height * b.Width * 4];
+            
+
+            var b1 = new System.Drawing.Bitmap(b.Width, b.Height,PixelFormat.Format32bppRgb);
+            using (var g = Graphics.FromImage(b1))
+            {
+                g.SmoothingMode = SmoothingMode.None;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.CompositingQuality = CompositingQuality.AssumeLinear;
+                g.DrawImage(b,new PointF(0,0));
+            }
+
+
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, b1.Width, b.Height);
+            var bitmapData = b1.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, b1.PixelFormat);
+            myDll.loadTextute(chanel, bitmapData.Scan0, b1.Width, b1.Height);
+           
+            b1.UnlockBits(bitmapData);
+
+            // Old texture loading
+            /*
+
+            byte[] bb = new byte[b1.Height * b1.Width * 4];
+
+            
             for (int i = 0; i < b.Height; ++i)
             {
                 for (int j = 0; j < b.Width; ++j)
                 {
-                    var c = b.GetPixel(j, i);
+                    var c = b1.GetPixel(j, i);
                     int offset = i * b.Width * 4 + j * 4;
                     bb[offset] = c.R;
                     bb[offset + 1] = c.G;
@@ -253,10 +281,14 @@ namespace KG_SHADER_forms
 
                 }
             }
-            IntPtr unmanagedPointer = Marshal.AllocHGlobal(b.Height * b.Width * 4);
-            Marshal.Copy(bb, 0, unmanagedPointer, b.Height * b.Width * 4);
-            myDll.loadTextute(chanel, unmanagedPointer, b.Width, b.Height);
+            IntPtr unmanagedPointer = Marshal.AllocHGlobal(b1.Height * b1.Width * 4);
+            Marshal.Copy(bb, 0, unmanagedPointer, b1.Height * b1.Width * 4);
+            myDll.loadTextute(chanel, unmanagedPointer, b1.Width, b1.Height);
             Marshal.FreeHGlobal(unmanagedPointer);
+           
+             
+             */
+
         }
 
 

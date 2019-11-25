@@ -22,6 +22,7 @@
 
 #include "Texture.h"
 
+
 GuiTextRectangle rec;
 
 OpenGL *ogl_obj;
@@ -478,12 +479,16 @@ void Render(OpenGL *ogl)
 	if (mode == Mode::PLANE)
 	{
 		glBegin(GL_QUADS);
+		
 		glTexCoord2d(1, 1);
 		glVertex3d(3, 3, 0);
+		
 		glTexCoord2d(1, 0);
 		glVertex3d(3, -3, 0);
+		
 		glTexCoord2d(0, 0);
 		glVertex3d(-3, -3, 0);
+		
 		glTexCoord2d(0, 1);
 		glVertex3d(-3, 3, 0);
 		glEnd();
@@ -499,7 +504,7 @@ void Render(OpenGL *ogl)
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		glOrtho(0, 1, 1, 0, 0, 1);
+		glOrtho(0, 1, 0, 1, 0, 1);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();

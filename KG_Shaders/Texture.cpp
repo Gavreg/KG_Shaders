@@ -1,7 +1,8 @@
 
 #include "Texture.h"
 
-
+#include <algorithm>
+#include <array>
 
 
 Texture::~Texture()
@@ -48,8 +49,16 @@ void Texture::loadFromBuffer(unsigned char * buf, int w, int h)
 	//биндим айдишник, все что будет происходить с текстурой, будте происходить по этому »ƒ
 	glBindTexture(GL_TEXTURE_2D, texId);
 
+	//инвентируем строки в текстуре (сособенности хранени€ битмапа)
+	auto buf_re = new unsigned char[w * h * 4];
+	for (int i = 0; i < h-1; ++i)
+	{
+		std::copy(buf + i * w * 4, buf + (i + 1) * w * 4, buf_re + (h - i - 1) * w * 4);
+	}
+	
 	//загружаем текстуру в видеоп€м€ть, в оперативке нам больше  она не нужна
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buf_re);
+	delete[] buf_re;
 
 	//наводим шмон
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
