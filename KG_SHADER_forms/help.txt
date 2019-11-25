@@ -9,7 +9,7 @@ KG Shaders
   4 - бабочка.
 
  ¬нешние переменные (передаваемые из программы):
-  uniform float iTime; // врем€ рендера
+  uniform int iTime; // врем€ рендера (в миллисекундах)
   uniform sampler2D iTexture0;  //текстурный идентификатор, 0-3
   uniform vec2 iResolution; //размеры области рендера
   uniform vec3 iLightPos; //координаты желтой точки 

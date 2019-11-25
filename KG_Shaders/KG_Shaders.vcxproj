@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="angle.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="GL\glext.h" />
     <ClInclude Include="GUItextRectangle.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="MyOGL.h" />
