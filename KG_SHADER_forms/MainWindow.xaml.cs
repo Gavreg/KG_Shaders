@@ -452,25 +452,35 @@ namespace KG_SHADER_forms
             myDll.deleteTexture(number);
         }
 
+        private string lastDir = string.Empty;
         private void loadTexture(int number)
         {
             Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
 
-            if (loadedProject == string.Empty)
+            if (lastDir == String.Empty)
             {
-                openDlg.InitialDirectory =
-                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                if (loadedProject == string.Empty)
+                {
+                    openDlg.InitialDirectory =
+                        System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                }
+                else
+                {
+                    openDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+                }
+                
             }
             else
             {
-                openDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+                openDlg.InitialDirectory = lastDir;
             }
-
             if (openDlg.ShowDialog() == true)
             {
                 string s = openDlg.FileName;
                 LoadTextureFromFile(number, s);
+                lastDir = System.IO.Path.GetDirectoryName(s);
             }
+
         }
 
         private void SaveAs_Click(object sender, RoutedEventArgs e)
