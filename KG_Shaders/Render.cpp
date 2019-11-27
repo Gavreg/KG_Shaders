@@ -52,8 +52,8 @@ public:
 	//значния масеры по умолчанию
 	CustomCamera()
 	{
-		camDist = 15;
-		fi1 = 1;
+		camDist = 10;
+		fi1 = -1;
 		fi2 = 1;
 	}
 

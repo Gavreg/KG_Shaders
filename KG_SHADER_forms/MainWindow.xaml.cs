@@ -151,6 +151,11 @@ namespace KG_SHADER_forms
             
         }
 
+        void btnLoadDefTexture0(object sender, RoutedEventArgs e)
+        {
+            LoadTextureFromResourse(0, "deftex.jpg");
+        }
+
 
         void loadProject(string s)
         {
@@ -228,6 +233,8 @@ namespace KG_SHADER_forms
 
         private void compileShaders()
         {
+            tbLog.Text = "";
+            tbLog.Text += "Compiling... \n";
             {
                 string a = tbVert.Text;
                 string[] array = a.Split(new string[] { "\r" }, StringSplitOptions.None);
@@ -263,10 +270,11 @@ namespace KG_SHADER_forms
             if (myDll.errLength() > 0)
             {
                 string err = myDll.getErrStr();
-                tbLog.Text = err;
+                tbLog.Text += "ERRORS!!\r";
+                tbLog.Text += err;
             }
             else
-                tbLog.Text = "ok-ok";
+                tbLog.Text += "Compiled!";
         }
         private void bApplyShaders_Click(object sender, RoutedEventArgs e)
         {
