@@ -144,7 +144,7 @@
     <Resource Include="help.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="texture.bmp" />
+    <Resource Include="deftex.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

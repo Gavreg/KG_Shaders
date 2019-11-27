@@ -72,6 +72,7 @@ void Texture::loadFromBuffer(unsigned char * buf, int w, int h)
 void Texture::deleteTexture()
 {
 	glDeleteTextures(1, &texId);
+	texId = 0;
 }
 
 void Texture::bindTexture()

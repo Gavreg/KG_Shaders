@@ -19,7 +19,11 @@ using System.Net;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using System.Reflection;
+using System.Windows.Forms;
+using Application = System.Windows.Application;
 using Image = System.Windows.Controls.Image;
+using MessageBox = System.Windows.MessageBox;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 
@@ -49,8 +53,11 @@ internal static class myDll
     [DllImport("KG_Shaders.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
     public static extern void ex_Compile();
 
-    [DllImport("KG_Shaders.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("KG_Shaders.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern int loadTextute(int chanel, IntPtr texture, int w, int h);
+
+    [DllImport("KG_Shaders.dll",  CallingConvention = CallingConvention.Cdecl)]
+    public static extern int deleteTexture(int chanel);
 
     [DllImport("KG_Shaders.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.LPStr)]
@@ -67,7 +74,11 @@ namespace KG_SHADER_forms
 
     public class ControlHost : HwndHost
     {
-        IntPtr hWnd;     
+        IntPtr hWnd;
+
+        public delegate void redy_delegate();
+
+        public redy_delegate ready;
 
         public ControlHost()
         {
@@ -78,6 +89,7 @@ namespace KG_SHADER_forms
         {
             IntPtr hinstance = Marshal.GetHINSTANCE(typeof(App).Module);
             hWnd = myDll.CreateWnd((IntPtr)hinstance.ToPointer() + 6, (IntPtr)hwndParent.Handle);
+            ready?.Invoke();
             return new HandleRef(this, hWnd);
         }
 
@@ -95,9 +107,20 @@ namespace KG_SHADER_forms
     public partial class MainWindow : Window
     {
 
+        enum TextureType
+        {
+            None,
+            File,
+            Resource
+        };
         string loadedProject = string.Empty;
         Image[] imgArr = new Image[4];
         string[] textures = new string[4];
+
+        private TextureType[] texTypes =
+        {
+            TextureType.None, TextureType.None, TextureType.None, TextureType.None
+        };
 
         public MainWindow()
         {
@@ -108,6 +131,13 @@ namespace KG_SHADER_forms
                 ControlHost host = new ControlHost();
                 grid.Content = host;
                 host.Visibility = Visibility.Visible;
+
+               
+                host.ready += () =>
+                {
+                    LoadTextureFromResourse(0, "deftex.jpg"); 
+                    compileShaders();
+                };
             };
 
             imgArr[0] = iTexture0;
@@ -122,6 +152,11 @@ namespace KG_SHADER_forms
             
         }
 
+        void btnLoadDefTexture0(object sender, RoutedEventArgs e)
+        {
+            LoadTextureFromResourse(0, "deftex.jpg");
+        }
+
 
         void loadProject(string s)
         {
@@ -132,20 +167,41 @@ namespace KG_SHADER_forms
 
             for (int i=0; i<4; ++i)
             {
+                deleteTexture(i);
+                
                 string fname = (string)root.Attribute("t" + Convert.ToString(i));
                 if (fname == string.Empty)
                     continue;
-                FileInfo fi = new FileInfo(fname);
+                
                 textures[i] = fname;
-
-                if (!fi.Exists)
+                TextureType tt = TextureType.None;
+                if (root.Attribute("tt" + Convert.ToString(i)) != null)
                 {
-                    string name = fi.Name;
-                    string projdir = (new FileInfo(s)).Directory.FullName;
-                    fname = projdir + "//" + name;
+                    int _tt = Convert.ToInt32(root.Attribute("tt" + Convert.ToString(i)).Value);
+                    tt = (TextureType) _tt;
                 }
+                else
+                {
+                    tt = TextureType.File;
+                }
+                  
+                texTypes[i] = tt;
 
-                LoadTexture(i, fname);
+
+                if (tt == TextureType.File)
+                {
+                    FileInfo fi = new FileInfo(fname);
+                    if (!fi.Exists)
+                    {
+                        string name = fi.Name;
+                        string projdir = (new FileInfo(s)).Directory.FullName;
+                        fname = projdir + "//" + name;
+                    }
+                    LoadTextureFromFile(i, fname);
+                }
+                    
+                if (tt == TextureType.Resource)
+                    LoadTextureFromResourse(i,fname);
             }
 
             loadedProject = s;
@@ -164,6 +220,8 @@ namespace KG_SHADER_forms
             for (int i=0; i<=3; ++i)
             {
                 XAttribute t = new XAttribute("t" + Convert.ToString(i), textures[i]);
+                XAttribute ttype = new XAttribute("tt"+ Convert.ToString(i),(int)texTypes[i]);
+                root.Add(ttype);
                 root.Add(t);
             }
 
@@ -173,10 +231,11 @@ namespace KG_SHADER_forms
             xdoc.Save(s);
             this.Title = (new FileInfo(loadedProject).Name) + " - KG Shaders";
         }
-            
 
-        private void bApplyShaders_Click(object sender, RoutedEventArgs e)
+        private void compileShaders()
         {
+            tbLog.Text = "";
+            tbLog.Text += "Compiling... \n";
             {
                 string a = tbVert.Text;
                 string[] array = a.Split(new string[] { "\r" }, StringSplitOptions.None);
@@ -188,14 +247,14 @@ namespace KG_SHADER_forms
                     array[i] += "\n";
                     strings_lengts.Add(array[i].Length);
                 }
-  
+
                 myDll.ex_loadVertShader(array, strings_lengts.ToArray(), array.Length);
             }
             {
-                string  a = tbPix.Text;
+                string a = tbPix.Text;
 
                 string[] array = a.Split(new string[] { "\r" }, StringSplitOptions.None);
-                
+
                 List<int> strings_lengts = new List<int>();
 
                 for (int i = 0; i < array.Length; ++i)
@@ -206,16 +265,21 @@ namespace KG_SHADER_forms
 
                 myDll.ex_loadPixShader(array, strings_lengts.ToArray(), array.Length);
             }
-            
+
             myDll.ex_Compile();
-            
+
             if (myDll.errLength() > 0)
             {
                 string err = myDll.getErrStr();
-                tbLog.Text = err;
-            }               
+                tbLog.Text += "ERRORS!!\r";
+                tbLog.Text += err;
+            }
             else
-                tbLog.Text = "ok-ok";
+                tbLog.Text += "Compiled!";
+        }
+        private void bApplyShaders_Click(object sender, RoutedEventArgs e)
+        {
+            compileShaders();
         }
 
         private void bOpenModel_Click(object sender, RoutedEventArgs e)
@@ -229,7 +293,7 @@ namespace KG_SHADER_forms
             }
         }
 
-        private void LoadTexture(int chanel, string fileName)
+        private void LoadTextureFromFile(int chanel, string fileName)
         {
             System.Drawing.Bitmap b=null;
             System.Windows.Media.Imaging.BitmapSource bs=null;
@@ -252,25 +316,13 @@ namespace KG_SHADER_forms
                 return;
             }
 
+            textures[chanel] = fileName;
+            texTypes[chanel] = TextureType.File;
             imgArr[chanel].Source = (ImageSource)bs;
 
-            
-
-            var b1 = new System.Drawing.Bitmap(b.Width, b.Height,PixelFormat.Format32bppRgb);
-            using (var g = Graphics.FromImage(b1))
-            {
-                g.SmoothingMode = SmoothingMode.None;
-                g.InterpolationMode = InterpolationMode.NearestNeighbor;
-                g.CompositingQuality = CompositingQuality.AssumeLinear;
-                g.DrawImage(b,0,0,b1.Width,b1.Height);
-            }
+            SentBitmapTo3d(b,chanel);
 
 
-            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, b1.Width, b1.Height);
-            var bitmapData = b1.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, b1.PixelFormat);
-            myDll.loadTextute(chanel, bitmapData.Scan0, b1.Width, b1.Height);
-           
-            b1.UnlockBits(bitmapData);
 
             // Old texture loading
             /*
@@ -300,6 +352,61 @@ namespace KG_SHADER_forms
 
         }
 
+        private void LoadTextureFromResourse(int chanel, string resKey)
+        {
+            var bitmapImage = new BitmapImage(new Uri(@"pack://application:,,,/"
+                                                + Assembly.GetExecutingAssembly().GetName().Name
+                                                + ";component/"
+                                                + resKey, UriKind.Absolute));
+
+            var bitmap = BitmapImage2Bitmap(bitmapImage);
+            var bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                bitmap.GetHbitmap(),
+                IntPtr.Zero,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions()
+            );
+
+            imgArr[chanel].Source = bs;
+
+            textures[chanel] = resKey;
+            texTypes[chanel] = TextureType.Resource;
+            SentBitmapTo3d(bitmap,chanel);
+
+
+        }
+        private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
+        {
+            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
+
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+                enc.Save(outStream);
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+
+                return new Bitmap(bitmap);
+            }
+        }
+
+        private void SentBitmapTo3d(System.Drawing.Bitmap b, int chanel)
+        {
+            var b1 = new System.Drawing.Bitmap(b.Width, b.Height, PixelFormat.Format32bppRgb);
+            using (var g = Graphics.FromImage(b1))
+            {
+                g.SmoothingMode = SmoothingMode.None;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.CompositingQuality = CompositingQuality.AssumeLinear;
+                g.DrawImage(b, 0, 0, b1.Width, b1.Height);
+            }
+
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, b1.Width, b1.Height);
+            var bitmapData = b1.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, b1.PixelFormat);
+            myDll.loadTextute(chanel, bitmapData.Scan0, b1.Width, b1.Height);
+            b1.UnlockBits(bitmapData);
+        }
+
         private void btnTexLoad0(object sender, RoutedEventArgs e)
         {
             loadTexture(0);
@@ -320,21 +427,76 @@ namespace KG_SHADER_forms
             loadTexture(3);
         }
 
+        private void btnTexDelete0(object sender, RoutedEventArgs e)
+        {
+            deleteTexture(0);
+        }
+        private void btnTexDelete1(object sender, RoutedEventArgs e)
+        {
+            deleteTexture(1);
+        }
+        private void btnTexDelete2(object sender, RoutedEventArgs e)
+        {
+            deleteTexture(2);
+        }
+        private void btnTexDelete3(object sender, RoutedEventArgs e)
+        {
+            deleteTexture(3);
+        }
+
+        private void deleteTexture(int number)
+        {
+            imgArr[number].Source = null;
+            textures[number] = string.Empty;
+            texTypes[number] = TextureType.None;
+            myDll.deleteTexture(number);
+        }
+
+        private string lastDir = string.Empty;
         private void loadTexture(int number)
         {
             Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
 
+            if (lastDir == String.Empty)
+            {
+                if (loadedProject == string.Empty)
+                {
+                    openDlg.InitialDirectory =
+                        System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                }
+                else
+                {
+                    openDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+                }
+                
+            }
+            else
+            {
+                openDlg.InitialDirectory = lastDir;
+            }
             if (openDlg.ShowDialog() == true)
             {
                 string s = openDlg.FileName;
-                textures[number] = s;
-                LoadTexture(number, s);
+                LoadTextureFromFile(number, s);
+                lastDir = System.IO.Path.GetDirectoryName(s);
             }
+
         }
 
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog saveDlg = new Microsoft.Win32.SaveFileDialog();
+
+            if (loadedProject == string.Empty)
+            {
+                saveDlg.InitialDirectory =
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            }
+            else
+            {
+                saveDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+            }
+
             saveDlg.FileName = "Shader project";
             saveDlg.DefaultExt = "kgs";
             saveDlg.Filter = "Файлы KG-Shader (*.kgs)|*.kgs";
@@ -357,6 +519,15 @@ namespace KG_SHADER_forms
         {
             Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
             openDlg.Filter = "Файлы KG-Shader (*.kgs)|*.kgs";
+            if (loadedProject == string.Empty)
+            {
+                openDlg.InitialDirectory =
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            }
+            else
+            {
+                openDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+            }
             if (openDlg.ShowDialog() == true)
             {
                 string s = openDlg.FileName;
