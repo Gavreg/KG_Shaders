@@ -321,6 +321,12 @@ extern "C" __declspec(dllexport) void loadTextute(int chanel, unsigned char *tex
 	t->loadFromBuffer(texture, w, h);
 }
 
+extern "C" __declspec(dllexport) void deleteTexture(int chanel)
+{
+	Texture* t = tex + chanel;
+	t->deleteTexture();
+}
+
 //выполняется перед первым рендером
 void initRender(OpenGL *ogl)
 {

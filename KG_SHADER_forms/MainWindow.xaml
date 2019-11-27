@@ -22,6 +22,9 @@
             <Setter Property="Control.Height" Value="23"></Setter>
             <Setter Property="Control.Margin" Value="200,10,185,87"></Setter>
         </Style>
+
+        <BitmapImage x:Key="DefaultTexture" UriSource="deftex.jpg" />
+
     </Window.Resources>
     <Grid>
         <Button x:Name="btnHelp" Margin="0,0,0,0" HorizontalAlignment="Right" Width="25" Height="25" VerticalAlignment="Top" Click="btnHelp_Click">?</Button>
@@ -69,6 +72,7 @@
                                         </Frame>
                                         <Button Content="Загрузить"  Style="{StaticResource textureBtnStyle}" Click="btnTexLoad0"/>
                                         <Label Content="TEXTURE__0" Style="{StaticResource textureLabelStyle}"/>
+                                        <Button Margin="286,10,154,87" Click="btnTexDelete0">Х</Button>
                                     </Grid>
                                 </Frame.Content>
                             </Frame>
@@ -83,6 +87,7 @@
                                         </Frame>
                                         <Button  Content="Загрузить" Click="btnTexLoad1" Style="{StaticResource textureBtnStyle}"/>
                                         <Label Content="TEXTURE__1" Style="{StaticResource textureLabelStyle}"/>
+                                        <Button Margin="286,10,154,87" Click="btnTexDelete1">Х</Button>
                                     </Grid>
                                 </Frame.Content>
                             </Frame>
@@ -97,6 +102,7 @@
                                         </Frame>
                                         <Button Content="Загрузить" Click="btnTexLoad2" Style="{StaticResource textureBtnStyle}"/>
                                         <Label Content="TEXTURE__2" Style="{StaticResource textureLabelStyle}"/>
+                                        <Button Margin="286,10,154,87" Click="btnTexDelete2">Х</Button>
                                     </Grid>
                                 </Frame.Content>
                             </Frame>
@@ -111,6 +117,7 @@
                                         </Frame>
                                         <Button Content="Загрузить" Click="btnTexLoad3" Style="{StaticResource textureBtnStyle}"/>
                                         <Label Content="TEXTURE__3" Style="{StaticResource textureLabelStyle}"/>
+                                        <Button Margin="286,10,154,87" Click="btnTexDelete3">Х</Button>
                                     </Grid>
                                 </Frame.Content>
                             </Frame>
