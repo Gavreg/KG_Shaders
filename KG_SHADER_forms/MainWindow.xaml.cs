@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Reflection;
 using System.Windows.Forms;
+using Application = System.Windows.Application;
 using Image = System.Windows.Controls.Image;
 using MessageBox = System.Windows.MessageBox;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
@@ -455,6 +456,16 @@ namespace KG_SHADER_forms
         {
             Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
 
+            if (loadedProject == string.Empty)
+            {
+                openDlg.InitialDirectory =
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            }
+            else
+            {
+                openDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+            }
+
             if (openDlg.ShowDialog() == true)
             {
                 string s = openDlg.FileName;
@@ -465,6 +476,17 @@ namespace KG_SHADER_forms
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog saveDlg = new Microsoft.Win32.SaveFileDialog();
+
+            if (loadedProject == string.Empty)
+            {
+                saveDlg.InitialDirectory =
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            }
+            else
+            {
+                saveDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+            }
+
             saveDlg.FileName = "Shader project";
             saveDlg.DefaultExt = "kgs";
             saveDlg.Filter = "Файлы KG-Shader (*.kgs)|*.kgs";
@@ -487,6 +509,15 @@ namespace KG_SHADER_forms
         {
             Microsoft.Win32.OpenFileDialog openDlg = new Microsoft.Win32.OpenFileDialog();
             openDlg.Filter = "Файлы KG-Shader (*.kgs)|*.kgs";
+            if (loadedProject == string.Empty)
+            {
+                openDlg.InitialDirectory =
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            }
+            else
+            {
+                openDlg.InitialDirectory = System.IO.Path.GetDirectoryName(loadedProject);
+            }
             if (openDlg.ShowDialog() == true)
             {
                 string s = openDlg.FileName;
