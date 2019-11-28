@@ -107,6 +107,9 @@ namespace KG_SHADER_forms
     public partial class MainWindow : Window
     {
 
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
         enum TextureType
         {
             None,
@@ -297,28 +300,28 @@ namespace KG_SHADER_forms
         {
             System.Drawing.Bitmap b=null;
             System.Windows.Media.Imaging.BitmapSource bs=null;
-            try
-            {
-                if (new FileInfo(fileName).Exists == false)
-                    return; 
+
+            if (new FileInfo(fileName).Exists == false)
+                return; 
                 
-                b = new System.Drawing.Bitmap(fileName);
-                bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                            b.GetHbitmap(),
-                            IntPtr.Zero,
-                            Int32Rect.Empty,
-                            BitmapSizeOptions.FromEmptyOptions()
-                            );
-            }
-            catch (Exception ex)
+            b = new System.Drawing.Bitmap(fileName);
+
+
+            using (MemoryStream memory = new MemoryStream())
             {
-                MessageBox.Show(ex.Message);
-                return;
+                b.Save(memory, ImageFormat.Png);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                imgArr[chanel].Source = bitmapImage;
             }
 
             textures[chanel] = fileName;
             texTypes[chanel] = TextureType.File;
-            imgArr[chanel].Source = (ImageSource)bs;
+           
 
             SentBitmapTo3d(b,chanel);
 
@@ -360,14 +363,17 @@ namespace KG_SHADER_forms
                                                 + resKey, UriKind.Absolute));
 
             var bitmap = BitmapImage2Bitmap(bitmapImage);
+            var hbitmap = bitmap.GetHbitmap();
             var bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                bitmap.GetHbitmap(),
+                hbitmap,
                 IntPtr.Zero,
                 Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions()
             );
 
-            imgArr[chanel].Source = bs;
+            imgArr[chanel].Source = bitmapImage;
+
+            DeleteObject(hbitmap);
 
             textures[chanel] = resKey;
             texTypes[chanel] = TextureType.Resource;
@@ -379,15 +385,15 @@ namespace KG_SHADER_forms
         {
             // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
 
+            System.Drawing.Bitmap bitmap;
             using (MemoryStream outStream = new MemoryStream())
             {
                 BitmapEncoder enc = new BmpBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(bitmapImage));
                 enc.Save(outStream);
-                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
-
-                return new Bitmap(bitmap);
+                bitmap = new System.Drawing.Bitmap(outStream);
             }
+            return bitmap;
         }
 
         private void SentBitmapTo3d(System.Drawing.Bitmap b, int chanel)
