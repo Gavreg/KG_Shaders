@@ -22,10 +22,14 @@
             <Setter Property="Control.Height" Value="23"></Setter>
             <Setter Property="Control.Margin" Value="200,10,185,87"></Setter>
         </Style>
-     
+
 
         <Style x:Key="ButtonStyle_delete" TargetType="{x:Type Button}">
             <Setter Property="ToolTip" Value="Отключить текстуру"/>
+            <Setter Property="Height" Value="23"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Width" Value="26"/>
         </Style>
 
     </Window.Resources>
@@ -75,8 +79,8 @@
                                         </Frame>
                                         <Button Content="Загрузить"  Style="{StaticResource textureBtnStyle}" Click="btnTexLoad0"/>
                                         <Label Content="TEXTURE__0" Style="{StaticResource textureLabelStyle}"/>
-                                        <Button Margin="286,10,154,87" Click="btnTexDelete0" Style="{StaticResource ButtonStyle_delete}">Х</Button>
-                                        <Button Margin="317,10,123,87" Click="btnLoadDefTexture0" ToolTip="Загрузить текстуру по умоланию" >Def</Button>
+                                        <Button Margin="286,10,0,0" Click="btnTexDelete0" Style="{StaticResource ButtonStyle_delete}" >Х</Button>
+                                        <Button Margin="317,10,0,0" Click="btnLoadDefTexture0" ToolTip="Загрузить текстуру по умоланию" HorizontalAlignment="Left" Width="26" Height="23" VerticalAlignment="Top" >Def</Button>
                                     </Grid>
                                 </Frame.Content>
                             </Frame>
