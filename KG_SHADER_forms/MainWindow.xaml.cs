@@ -362,24 +362,24 @@ namespace KG_SHADER_forms
                                                 + ";component/"
                                                 + resKey, UriKind.Absolute));
 
-            var bitmap = BitmapImage2Bitmap(bitmapImage);
-            var hbitmap = bitmap.GetHbitmap();
-            var bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                hbitmap,
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions()
-            );
+            using (var bitmap = BitmapImage2Bitmap(bitmapImage))
+            {
+                var hbitmap = bitmap.GetHbitmap();
+                var bs = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    hbitmap,
+                    IntPtr.Zero,
+                    Int32Rect.Empty,
+                    BitmapSizeOptions.FromEmptyOptions()
+                );
 
-            imgArr[chanel].Source = bitmapImage;
+                imgArr[chanel].Source = bitmapImage;
 
-            DeleteObject(hbitmap);
+                DeleteObject(hbitmap);
+                textures[chanel] = resKey;
+                texTypes[chanel] = TextureType.Resource;
+                SentBitmapTo3d(bitmap, chanel);
 
-            textures[chanel] = resKey;
-            texTypes[chanel] = TextureType.Resource;
-            SentBitmapTo3d(bitmap,chanel);
-
-
+            }
         }
         private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
         {
